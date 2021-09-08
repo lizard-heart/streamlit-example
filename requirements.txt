@@ -8,4 +8,4 @@ matplotlib
 gdown
 keras
 tensorflow
-deepcopy
+copy
