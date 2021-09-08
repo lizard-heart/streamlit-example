@@ -7,4 +7,10 @@ tempfile
 os
 time
 model
-PIL
+Pillow
+matplotlib
+gdown
+keras
+struct
+tensorflow
+deepcopy
