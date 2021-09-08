@@ -3,7 +3,6 @@ pandas
 streamlit
 numpy
 opencv-python
-model
 Pillow
 matplotlib
 gdown
