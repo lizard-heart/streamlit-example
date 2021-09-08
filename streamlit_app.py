@@ -1,38 +1,40 @@
-from collections import namedtuple
-import altair as alt
-import math
-import pandas as pd
 import streamlit as st
+import numpy as np
+import cv2
+from PIL import Image
+import tempfile
+import os
+import time
+import model
 
-"""
-# Welcome to Streamlit!
+st.title("YOLO Demo")
+st.header("Drag and drop any image or video to test the YOLO model")
 
-Edit `/streamlit_app.py` to customize this app to your heart's desire :heart:
+uploaded_file = st.file_uploader("Upload a file", type=["jpg", "jpeg", "png", "mp4", "mov"])
+if uploaded_file is not None:
+  if uploaded_file.type.startswith("image"):
+    image = Image.open(uploaded_file)
+    st.image(model.detect_image(image))
+  else:
+    tfile = tempfile.NamedTemporaryFile(delete=False) 
+    tfile.write(uploaded_file.read())
 
-If you have any questions, checkout our [documentation](https://docs.streamlit.io) and [community
-forums](https://discuss.streamlit.io).
+    path = f'/content/user/{uploaded_file.name}'
+    detected_path = f'/content/user/{uploaded_file.name.partition(".")[0]}_detected.{uploaded_file.name.partition(".")[2]}'
 
-In the meantime, below is an example of what you can do with just a few lines of code:
-"""
+    try:
+      model.detect_video(tfile.name, path)
 
+      progress = st.empty()
+      progress.text('Encoding...')
+      os.system(f"ffmpeg -y -i {path} -vcodec libx264 {detected_path}")
+      time.sleep(1)
+      progress.empty()
 
-with st.echo(code_location='below'):
-    total_points = st.slider("Number of points in spiral", 1, 5000, 2000)
-    num_turns = st.slider("Number of turns in spiral", 1, 100, 9)
-
-    Point = namedtuple('Point', 'x y')
-    data = []
-
-    points_per_turn = total_points / num_turns
-
-    for curr_point_num in range(total_points):
-        curr_turn, i = divmod(curr_point_num, points_per_turn)
-        angle = (curr_turn + 1) * 2 * math.pi * i / points_per_turn
-        radius = curr_point_num / total_points
-        x = radius * math.cos(angle)
-        y = radius * math.sin(angle)
-        data.append(Point(x, y))
-
-    st.altair_chart(alt.Chart(pd.DataFrame(data), height=500, width=500)
-        .mark_circle(color='#0068c9', opacity=0.5)
-        .encode(x='x:Q', y='y:Q'))
+      os.remove(path)
+      st.video(detected_path)
+      os.remove(detected_path)
+    except:
+      st.write("ERROR")
+      os.remove(path)
+      os.remove(detected_path)
