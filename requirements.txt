@@ -2,8 +2,7 @@ altair
 pandas
 streamlit
 numpy
-opencv-python
-opencv-contrib-python
+opencv-python-headless
 Pillow
 matplotlib
 gdown
